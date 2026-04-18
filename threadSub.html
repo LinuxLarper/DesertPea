@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Login to Desert Pea </title>
+<link rel="stylesheet" type="text/css" href="../static/styles.css">
+</head>
+<body>
+<div class="topnav">
+    <a href="../index.html">Home</a>
+    <a href="login.html">Login</a>
+    <a class="active" href="page.html">pages</a>
+    <a href="UserInfo.html" style="align-self: right;"> User </a>
+</div>
+<div class="heading" style="position: sticky; top: 0; width: 100%;"> 
+<h1 id="heading" style="text-align: center; margin-right: 10px;" name="heading"> Create a thread </h1>
+</div>
+
+<div class="CircleText" style="height: 70vw; background-color: rgb(255, 168, 109); border-radius: 80px ; text-align: left;"> 
+    <button class="CircleText inputclass" type="button" onclick="sendThreadToDataBase()"> submit thread </button>
+    <div style="align-self: left; margin-top: 10px;" class="loginbox">
+        <input class="CircleText inputclass" placeholder="Title" id="Title"> </input>
+    </div>
+
+    <div style="margin-top: 10px; align-self: left;" class="loginbox">
+        <textarea style ="text-align: left; vertical-align: top; height: 45vw;" width="70vw" class="CircleText inputclass" id="ThreadText" placeholder="Text" name="text"> </textarea>
+        
+    </div>
+</div>
+
+<script> 
+
+        async function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+    }
+
+        async function sendThreadToDataBase() {
+            var HeaderElement = document.getElementById("heading");
+            var Tit = document.getElementById("Title").value;
+            var Text = document.getElementById("ThreadText").value;
+            var Usrcookie = await getCookie("user")
+
+            if (typeof Usrcookie == 'undefined') {
+                console.log('No cookie found')
+            } else if (typeof Usrcookie != 'undefined') {
+                console.log(Usrcookie)
+                var Values = {
+                    Title: Tit,
+                    Txt: Text,
+                    cookie: Usrcookie
+                }
+
+                console.log(Tit.length)
+                if ( Tit.length < 20 && Text.length < 500 && Tit.length > 0 && Text.length > 0) {
+                    const res = await fetch('/api/Thread', {
+                        method: "POST",
+                        headers: {
+                                    "Content-type":"application/json"
+                                },
+                            body:JSON.stringify(Values)
+                        })
+                    console.log(res)
+                    res.text().then(txt => {
+                        console.log(txt)
+                       if ( txt == "1" ) {
+                        console.log("yay")
+                        HeaderElement.innerText = "Thread successfully made!" 
+                        } else if ( txt == "2" ) {
+                            console.log("nay")
+                            HeaderElement.innerText = "Error are you sure youre logged in?" 
+                        } else {
+                            HeaderElement.innerText = "Error try agian?" 
+                        }
+                   
+                    }) 
+                }  
+            }
+        }
+</script>
+
+</body>
+</html>
