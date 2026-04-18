@@ -7,10 +7,9 @@ import bcrypt from 'bcrypt'
 
 
 const BadChars = ["'", '"', "-", "#", "*", "/", ";", "=", "(", ")", "+", "%", "&", "^"]
-let clean =0;
 const app = express();
 const __dirname = import.meta.dirname;
-const port = 3001
+const port = 443
 
 async function HashPassword(Password) {
     const salt = bcrypt.genSaltSync(10)
@@ -59,69 +58,12 @@ async function passwordrows(rows) {
   }
 }
 
-async function login(username, Password, rows) {
-  const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
-  if (err) return console.log("error")
-  });
-  if ( rows != "" ) {
-    console.log("Checking login...")
-    console.log(Password)
-    HashPassword(Password).then(hassedPassword => {
-      console.log("Hashed password is : " + hassedPassword )
-      db.all('SELECT * FROM users WHERE password = ?', [hassedPassword], function(error, rowss) {
-      console.log(rowss)
-      passwordrows(rowss).then(returnedValue => {
-        console.log(returnedValue)
-        return returnedValue;
-      })
-      })
-    })
-  } else if ( rows == "" ) {
-    return 0;
-  }
-}
-
-async function loginCheck(username) {
-  const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
-  if (err) return console.log("error")
-  });
-  console.log("Getting db with user "+username)
-  db.get('SELECT password FROM users WHERE name = ?', [username], function(error, rows) {
-    return rows
-})}
-
-async function getThreads(page) {
-  const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
-  if (err) return console.log("error")
-  });
-  const min = 1*(page-1)
-  const max = 10*page
-  console.log(min + " :" + max + ", Is the range")
-  db.all('SELECT * FROM Posts WHERE id BETWEEN ? AND ?', [min, max], function(err,rows) {
-    console.log(rows)
-
-  })
-}
-
 async function ThreadToDataBase(Txt, Title, usr) {
   const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) return console.log("error")
   });
   db.run('INSERT INTO Posts(title, text, user) VALUES (?,?,?)', [Title, Txt, usr])
   
-}
-
-async function ValidCookie(cookie, Txt, Title, callback) {
-  const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
-  if (err) return console.log("error")
-  });
-
-  db.get('SELECT name FROM users WHERE cookieID = ?', [cookie], function(error, rows) {
-  console.log(rows.name)
-  if (rows != "") {
-    callback(Txt,Title, rows.name)
-  }
-  })
 }
 
 app.use('/static', express.static(path.join(__dirname + '/static'),),)
