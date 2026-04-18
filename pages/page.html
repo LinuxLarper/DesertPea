@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Home </title>
+<link rel="stylesheet" type="text/css" href="../static/styles.css">
+</head>
+<body>
+<div class="topnav">
+    <a href="../index.html">Home</a>
+    <a href="login.html">Login</a>
+    <a class="active" href="page.html">pages</a>
+    <a href="UserInfo.html" style="align-self: right;"> User </a>
+</div>
+
+<div class = "button">
+    <div style="text-align: right; margin-right: 3vw; margin-top: 3vw; margin-right: 50;" type="button" class="CircleText inputclass button" onclick="postRedirect()"> Make a post? Click here! </div>
+</div>
+
+<div>
+    <div id="nextPageID" style="text-align: center" type="button" class="CircleText inputclass button" onclick="nextPage()"> Next Page? </div>
+</div>
+
+
+
+<!-- <div class="ThreadBase" > Hate life
+<div class="ThreadPara"> Hello too </div>
+</div> -->
+
+<script>
+    console.log("Scripts loading")
+    async function CreateThreadElement(txt, tit) {
+        const BeforeElement = document.getElementById("nextPageID");
+        const NewElement = document.createElement('div');
+        NewElement.classList.add("ThreadBase")
+        NewElement.innerHTML = tit
+        const NewTextElement = document.createElement('div');
+        NewTextElement.classList.add("ThreadPara")
+        NewTextElement.innerHTML = txt
+        
+        document.body.append(NewElement);
+        NewElement.appendChild(NewTextElement)
+
+        BeforeElement.before(NewElement)
+    }
+
+    async function postRedirect() {
+        window.location.href = 'threadSub.html'
+        console.log("Here")
+    }
+
+    
+    async function nextPage() {
+        const params = new URLSearchParams(window.location.search);
+        const pageNum = params.get("page")
+        console.log("On page " + pageNum)
+        console.log("this makes mega sense")
+        const NewPage = parseInt(pageNum, 10) + 1
+        window.location.search = `?page=${NewPage}`
+    } 
+
+    async function LoadPage() {
+    console.log("Loading Page")
+    const BeforeElement = document.getElementById("nextPageID")
+    const params = new URLSearchParams(window.location.search);
+    const pageNum = params.get("page")
+    console.log("On page " + pageNum)
+    if (params == "") {
+        console.log("this makes sense")
+        window.location.search = "?page=1"
+    }
+    
+    const res = await fetch('/api/getThreads', {
+                method: "POST",
+                headers: {
+                    "Content-type":"application/json"
+                },
+                body:JSON.stringify({
+                    page: pageNum
+                })
+            })
+            res.json().then(response => {
+                for (const i of response) {
+                    console.log(i)
+                    CreateThreadElement(i.text,i.title)
+                }
+                console.log(response[0].total)
+                const num = (response[0].total/10)
+                const roundnum = Math.round(num)
+                console.log(num)
+                if (num != roundnum) {
+                    if (num - roundnum > 1) {
+                        console.log(num - roundnum)
+                        console.log("less than 1")
+                        const numText = (Math.round(num))
+                        console.log(numText)
+                        BeforeElement.innerText="Next Page? "+pageNum+" out of " +numText
+                        if (pageNum == numText) {
+                            BeforeElement.onclick = ""
+                        }
+                    } else {
+                            const numText = (Math.round(num) +1)
+                            console.log("less than 3 u luv me")
+                            console.log(numText)
+                            BeforeElement.innerText="Next Page? "+pageNum+" out of " +numText
+                            if (pageNum == numText) {
+                                BeforeElement.onclick = ""
+                            }
+                    }
+                } else {
+                    const numText = Math.round(num)
+                    BeforeElement.innerText="Next Page? "+pageNum+" out of " +numText
+                     if (pageNum == numText) {
+                        BeforeElement.onclick = ""
+                    }
+                }
+            })
+    }
+
+    LoadPage()
+
+</script>
+
+</body>
+</html>
