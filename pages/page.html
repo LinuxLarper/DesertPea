@@ -28,18 +28,16 @@
 
 <script>
     console.log("Scripts loading")
-    async function CreateThreadElement(txt, tit) {
+    async function CreateThreadElement(txt, tit, auth) {
         const BeforeElement = document.getElementById("nextPageID");
         const NewElement = document.createElement('div');
         NewElement.classList.add("ThreadBase")
-        NewElement.innerHTML = tit
+        NewElement.innerHTML = tit + " : sent by " + auth 
         const NewTextElement = document.createElement('div');
         NewTextElement.classList.add("ThreadPara")
-        NewTextElement.innerHTML = txt
-        
+        NewTextElement.innerHTML = txt 
         document.body.append(NewElement);
         NewElement.appendChild(NewTextElement)
-
         BeforeElement.before(NewElement)
     }
 
@@ -81,39 +79,24 @@
             res.json().then(response => {
                 for (const i of response) {
                     console.log(i)
-                    CreateThreadElement(i.text,i.title)
+                    CreateThreadElement(i.text,i.title, i.user)
                 }
                 console.log(response[0].total)
                 const num = (response[0].total/10)
-                const roundnum = Math.round(num)
                 console.log(num)
-                if (num != roundnum) {
-                    if (num - roundnum > 1) {
-                        console.log(num - roundnum)
-                        console.log("less than 1")
-                        const numText = (Math.round(num))
-                        console.log(numText)
-                        BeforeElement.innerText="Next Page? "+pageNum+" out of " +numText
-                        if (pageNum == numText) {
-                            BeforeElement.onclick = ""
-                        }
-                    } else {
-                            const numText = (Math.round(num) +1)
-                            console.log("less than 3 u luv me")
-                            console.log(numText)
-                            BeforeElement.innerText="Next Page? "+pageNum+" out of " +numText
-                            if (pageNum == numText) {
-                                BeforeElement.onclick = ""
-                            }
-                    }
-                } else {
-                    const numText = Math.round(num)
-                    BeforeElement.innerText="Next Page? "+pageNum+" out of " +numText
-                     if (pageNum == numText) {
+                if ( num % 1 != 0) {
+                  console.log(num+1-(num % 1))
+                  BeforeElement.innerText = "Page " + pageNum + " Out of " + (num+1-(num % 1))    
+                  if ((num+1 - (num % 1)) == pageNum) {
+                    BeforeElement.onclick = ""
+                  } 
+                } else if ( num % 1 == 0 ) {
+                    BeforeElement.innerText = "Page " + pageNum + " Out of " + num
+                    if (pageNum == num) {
                         BeforeElement.onclick = ""
-                    }
+                    }    
                 }
-            })
+            })  
     }
 
     LoadPage()
