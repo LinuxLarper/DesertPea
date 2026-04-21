@@ -2,6 +2,7 @@ import express from 'express'
 import sqlite3 from 'sqlite3'
 import path from "path"
 import bcrypt from 'bcrypt'
+import { resolveObjectURL } from 'buffer'
 
 
 
@@ -20,11 +21,13 @@ async function HashPassword(Password) {
 }
 
 async function Signup(username, Password, rows) {
+    console.log("here")
     if ( rows == "" ) {
       console.log("No previous user made with account name")
       console.log("Checking signup...")
       const charCheck = BadChars.some(char => username.includes(char))
       if ( charCheck == false && Password != "") {
+        console.log("Passed char check")
         HashPassword(Password).then(hashedPassword => {
           const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
           if (err) return console.log("error")
@@ -36,17 +39,25 @@ async function Signup(username, Password, rows) {
       }
     }
     else if ( rows != "" ) {
+        console.log("fuck u brada")
       return 0;
     }
 }
 
-async function dbCheck(username, password) {
+async function dbCheck(username, password, callback) {
   const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) return console.log("error")
   });
-  const rows = db.all('SELECT * FROM users WHERE name = ?', [username], function(error, rows) {
+  const rows = db.all('SELECT * FROM users WHERE name = ?', [username],   function(error, rows) {
   console.log(rows)
-  Signup(username, password, rows)
+  if (rows == "") {
+    console.log("Signing up")
+    callback(username, password, rows)
+    return 1
+  } else {
+    console.log("where is your sword")
+    return 0
+  }
   })
 }
 
@@ -93,8 +104,24 @@ app.post('/api/signup', async (req, res) => {
   const db = new sqlite3.Database('./userbase.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) return console.log("error")
   });
-  dbCheck(SignupValues.User, SignupValues.Password).then(res.send("You have successfully signed up as" + " " + SignupValues.User))
-});
+  const rows = db.all('SELECT * FROM users WHERE name = ?', [SignupValues.User],   function(error, rows) {
+  console.log(rows)
+  if (rows == "") {
+    console.log("here")
+    dbCheck(SignupValues.User, SignupValues.Password, Signup).then(result => {
+    console.log(result + " is the result")
+    if (result == 0) {
+      res.send("Failed to create account")
+    }
+    if (result != 0) {
+       res.send("You have successfully signed up as" + " " + SignupValues.User)
+    }
+  })
+  } else if (rows != "") {
+   console.log("here2")
+   res.send("Failed to create account") 
+  }
+})});
 // NEED TO ADD COOKIES + ERROR MESSAGE FOR FAILED LOGIN
 
 app.post('/api/login', async (req, res) => {
@@ -183,13 +210,12 @@ app.post('/api/getThreads', async (req,res) => {
   });
   const min = 1+(page*10)-10
   const max = 10*page
-  console.log(min + " :" + max + ", Is the range")
+  console.log(min + " : " + max + ", Is the range")
   db.all(`SELECT p.*, t.total
               FROM Posts p
               CROSS JOIN (SELECT COUNT(id) AS total FROM Posts) t
               WHERE p.id BETWEEN ? AND ?;
-`, [min, max], async function(err,rows) {
-      console.log(rows)
+`, [min, max], function(err,rows) {
       res.send(rows)
   })
 })
