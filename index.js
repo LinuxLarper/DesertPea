@@ -10,7 +10,7 @@ import { resolveObjectURL } from 'buffer'
 const BadChars = ["'", '"', "-", "#", "*", "/", ";", "=", "(", ")", "+", "%", "&", "^"]
 const app = express();
 const __dirname = import.meta.dirname;
-const port = 443
+const port = 8000
 
 async function HashPassword(Password) {
     const salt = bcrypt.genSaltSync(10)
