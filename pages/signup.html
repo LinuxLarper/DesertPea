@@ -44,7 +44,7 @@
     async function FetchUserSignup() {
         console.log("Fetching...")
         var HeaderElement = document.getElementById("heading");
-        var Username = document.getElementById("Username").value;
+        let Username = document.getElementById("Username").value;
         console.log(Password)
         var Password = document.getElementById("passwordBox").value;
         console.log(Username)
@@ -54,15 +54,23 @@
         };
         console.log("Signup")
         console.log(SignupValues)
-        const res = await fetch('/api/signup', {
+        try {
+            const res = await fetch('/api/signup', {
             method: "POST",
             headers: {
                 "Content-type":"application/json"
             },
             body:JSON.stringify(SignupValues)
         });
+        let createUser = 1;
         res.text().then(async txt => {
             HeaderElement.innerText = txt;
+            if (txt == "Failed to create account" || txt == "") {
+                console.log("failed to create an account")
+                createUser = 0;
+                let Username = ""
+                throw "failed to create user"
+            }
             const date = new Date();
             date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
             let expires = "; expires=" + date.toUTCString();  
@@ -86,6 +94,11 @@
                 document.cookie = `user=${txt}` + expires + '; path=/' 
             })
         })
+        } catch {
+            console.log("Error")
+            HeaderElement.innerText = "Failed to create new user"
+        }
+        
     }
 </script>
 
