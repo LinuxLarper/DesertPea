@@ -38,10 +38,10 @@
 
         async function sendThreadToDataBase() {
             var HeaderElement = document.getElementById("heading");
-            var Tit = document.getElementById("Title").value;
-            var Text = document.getElementById("ThreadText").value;
+            let Tit = document.getElementById("Title").value;
+            let Text = document.getElementById("ThreadText").value;
             var Usrcookie = await getCookie("user")
-
+            
             if (typeof Usrcookie == 'undefined') {
                 console.log('No cookie found')
             } else if (typeof Usrcookie != 'undefined') {
@@ -66,8 +66,8 @@
                         console.log(txt)
                        if ( txt == "1" ) {
                         console.log("yay")
-                        Tit.innerText = ""
-                        Text.innerText = ""
+                        document.getElementById("Title").value = ''
+                        document.getElementById("ThreadText").value = ''
                         HeaderElement.innerText = "Thread successfully made!" 
                         } else if ( txt == "2" ) {
                             console.log("nay")
